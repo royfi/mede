@@ -1,5 +1,13 @@
-medeDict = { #deze is voor later, ik wil de functie fruitMelomel deze laten gebruiken in de GUI ipv zelf invullen via input(), via een dropdown menu oid. 
-    "smaken": {
+from PySide6.QtWidgets import QApplication, QWidget
+import pprint
+
+karakterOpties = ('subtiel','gebalanceerd','intens')
+categorieOpties = ('fruit', 'kruid', 'elders') #later evt meer opties toevoegen
+
+
+
+medeDict = { 
+    'smaken': {
         "kers": {
             'fruitBasis':2.5, #fruitbasis gaat uit van per 4kg mede (of ~1 Gallon)
             'categorie':'fruit',
@@ -26,45 +34,109 @@ medeDict = { #deze is voor later, ik wil de functie fruitMelomel deze laten gebr
 }
 
 
-
 def main():
 
-    print('Wat is uw begin dichtheid?') 
-    startDichtheid = float(input())
-    print('Wat is uw eind dichtheid?')
-    eindDichtheid = float(input())
-    AlcoholPercentage(startDichtheid, eindDichtheid)
+  
+    alcoholPercentage()
     fruitMelomel() 
+    #recepten()
 
-def AlcoholPercentage(startDichtheid,eindDichtheid):
-    # test toevoegen, dat ik ook 1050 kan invoeren, en niet alleen 1.050 voor juiste hoeveelheid
+def alcoholPercentage():
+    # test toevoegen, dat ik ook 1050 kan invoeren, en niet alleen 1.050 voor juiste hoeveelheid\
+    while True:
+        try:
+            startDichtheid = float(input('Wat is uw begin dichtheid / gravity?'))
+            eindDichtheid = float(input('Wat is uw eind dichtheid / gravity?'))
+            break
+        except ValueError:
+            print('Vul bij beide alstublieft een getal in!')
+
     abv = (startDichtheid - eindDichtheid)*131.25 
     procent = f'{abv:.2f}%'
     print(f'Als uw begin dichtheid {startDichtheid} is en uw eind dichtheid {eindDichtheid} dan is uw alcohol percentage {procent}')
 
 def fruitMelomel():
-    print('Hoeveel liter aan mede wilt u maken?')
-    mede = float(input())
-    honing = (mede / 100)*45
+    
+    while True:
+        try:
+            medeVolume = float(input('Hoeveel liter aan mede wilt u maken?'))
+            break
+        except ValueError:
+            print('Vul alstublieft een getal in')
+    
+    honing = (medeVolume / 100)*45
+    
+    print('Van welke smaak uit de volgende lijst zou u het recept in van willen zien?')
+    print(list(medeDict["smaken"].keys()))
+    medeSmaak = input()
 
-    print('Wat voor melomel zou u willen maken, subtiel, gebalanceerd of intens?')
-    melomel = input()
-    fruitBasis = honing*1.5
-# later dit doen via dictionary, en de fruitBasis daarvan halen, zodat elke smaak zijn eigen formule heeft
+    while medeSmaak not in medeDict['smaken'].keys():
+        medeSmaak = input(f'Kies een van de smaken uit de lijst{list(medeDict['smaken'].keys)}')
+
+    melomel = medeDict['smaken'][medeSmaak]['smaakKarakter']
+    fruit = medeDict['smaken'][medeSmaak]['fruitBasis']
+
     if melomel =='subtiel':
-        fruitTotaal = fruitBasis * .5
+        fruitTotaal = fruit * .5
     elif melomel =='gebalanceerd':
-        fruitTotaal = fruitBasis
+        fruitTotaal = fruit
     elif melomel =='intens':
-        fruitTotaal = fruitBasis * 1.33
+        fruitTotaal = fruit * 1.33
     else:
         print('Gebruik een van de aangeboden opties.')
         return
-    # Later een optie toevoegen om ook te kiezen of er tijdens primaire en/of secundaire fermentatie fruit toegevoegd wordt, bepalen hoeveel fruit er dan nodig is in beide rondes
     
-    print(f'Voor uw melomel wordt {honing}kg aan honing aangeraden, en {fruitTotaal}kg aan fruit voor een totale hoeveelheid van {mede}L aan mede')
+    print(f'Voor uw melomel wordt {honing}kg aan honing aangeraden, en {fruitTotaal}kg aan {medeSmaak} voor een totale hoeveelheid van {medeVolume}L aan mede, voor een {melomel}e smaak')
+
+def recepten():
+    print('Welke smaak uit de volgende lijst zou u het recept van willen inzien?')
+    print(list(medeDict["smaken"].keys()))
+    smaak = input()
+    pprint.pprint(medeDict["smaken"][smaak])
+    
+def receptenBouwer():
+    
+    naam = input('Welk naam wilt u het recept geven?')
+    
+    while True:
+        try:
+            fruitBasis = float(input('Wat is de fruitbasis?'))
+            break
+        except ValueError:
+            print('Vul alstublieft een getal in!')
+                
+
+    categorie = input(f'Welke categorie wilt u het recept onder opslaan? kies uit: {categorieOpties}')
+    while categorie not in categorieOpties:
+        categorie = input(f'Kies alstublieft een van de volgende opties. {categorieOpties}')
+
+    karakter = input(f'Welk smaak karakter wilt u geven aan de drank? {karakterOpties}?')
+    while karakter not in karakterOpties:
+        karakter = input(f'Kies alstublieft een van de opties, {karakterOpties}')
+
+    while True:
+        try:
+            tijd = int(input('Hoeveel dagen wilt u de smaak in secundaire fermentatie laten rijpen?'))
+            break
+        except ValueError:
+            print('Vul alstublieft een heel getal in!')
+    smaakDuur = f'{tijd} dagen'
+    
+    medeDict['smaken'][naam] = {
+        'fruitBasis': fruitBasis,
+        'categorie': categorie,
+        'smaakKarakter': karakter,
+        'smaakDuur': smaakDuur,
+    }
+
+    pprint.pprint(medeDict['smaken'][naam])
+    
 
 
+#main()
+#alcoholPercentage()
+#fruitMelomel()
+#recepten() 
+receptenBouwer() 
+fruitMelomel()
 
-main()
-   
