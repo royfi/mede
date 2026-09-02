@@ -19,40 +19,35 @@ def alcoholPercentage(start_dichtheid, eind_dichtheid):
     
     return(start_dichtheid - eind_dichtheid)*131.25
     
-def fruitMelomel():
+def fruitMelomel(mede_volume, mede_smaak):
     
-    while True:
-        try:
-            medeVolume = float(input('Hoeveel liter aan mede wilt u maken?'))
-            break
-        except ValueError:
-            print('Vul alstublieft een getal in')
+    try: 
+        mede_volume = float(mede_volume)
+    except (TypeError, ValueError):
+        raise ValueError('Vul a.u.b. een getal in.')
     
-    honing = (medeVolume / 100)*45
-    
-    smaken = [smaak.title() for smaak in SMAKEN.keys()]
-    print(smaken)
-    medeSmaak = input('Van welke smaak uit de volgende lijst wilt u het recept zien?').strip().title()
-    
-  
+    if mede_volume <= 0:
+        raise ValueError('De hoeveelheid mede moet groter dan 0 zijn.')
 
-    while medeSmaak not in SMAKEN.keys():
-        medeSmaak = input(f'Kies een van de smaken uit de lijst {smaken}: ').strip().title()
+    mede_smaak = mede_smaak.strip().title()
 
-    melomel = SMAKEN[medeSmaak]['smaakKarakter']
-    fruit = SMAKEN[medeSmaak]['fruitBasis']
-
-    if melomel =='subtiel':
-        fruitTotaal = fruit * .5
-    elif melomel =='gebalanceerd':
-        fruitTotaal = fruit
-    elif melomel =='intens':
-        fruitTotaal = fruit * 1.33
-    else:
-        print('Gebruik een van de aangeboden opties.')
-        return
+    if mede_smaak not in SMAKEN:
+        raise ValueError('Kies een geldige smaak.')
     
-    print(f'Voor uw melomel wordt {honing}kg aan honing aangeraden, en {fruitTotaal}kg aan {medeSmaak} voor een totale hoeveelheid van {medeVolume}L aan mede, voor een {melomel}e smaak')
+     
+    honing = (mede_volume / 100)*45
+    smaakgegevens = SMAKEN[mede_smaak]
+    fruit = smaakgegevens['fruitBasis']
+    karakter = smaakgegevens['smaakKarakter']
+
+    if karakter =='subtiel':
+        fruit_totaal = fruit * .5
+    elif karakter =='gebalanceerd':
+        fruit_totaal = fruit
+    elif karakter =='intens':
+        fruit_totaal = fruit * 1.33
+   
+    return honing, fruit_totaal, karakter
 
 def recepten():
     #niet echt een recept nu, moet later dit beter formateren, en echte receptenlijst geven. ipv de dictLijst. mss extra dict met recepten?
