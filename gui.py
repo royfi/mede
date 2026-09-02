@@ -1,6 +1,12 @@
 import sys
 from PySide6.QtWidgets import QApplication, QDialog, QVBoxLayout, QPushButton , QLineEdit, QLabel, QMessageBox, QComboBox
-from berekeningen import alcoholPercentage, fruitMelomel, recepten, receptenBouwer
+from berekeningen import (
+    alcoholPercentage,
+    categorieOpties,
+    karakterOpties,
+    fruitMelomel,
+    receptenBouwer,
+)
 from bieb import SMAKEN
 
 def open_menu(dialog):
@@ -59,9 +65,9 @@ class SelectieDialog(QDialog):
     '''    
     def run_recepten_maker(self):
         self.close()
-        receptenBouwer()
+        dialog = BouwerDialog()
+        dialog.exec()
     
-
 class AlcoholDialog(QDialog):
     def __init__(self):
         super().__init__()
@@ -128,6 +134,7 @@ class MelomelDialog(QDialog):
            honing, fruit, karakter = fruitMelomel(volume,smaak)
         except ValueError as error:
             QMessageBox.warning(self, 'Fout', str(error))
+            return
 
         if fruit <= 1:
             fruit = fruit * 1000
@@ -147,7 +154,59 @@ class MelomelDialog(QDialog):
             f'Smaak: {karakter}'
             )
         
+class BouwerDialog(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Recepten Maker")
 
+        layout = QVBoxLayout(self)
+
+ 
+
+        self.naam_input = QLineEdit()
+        self.verhoudingen_input = QLineEdit()
+        self.categorie_input = QComboBox()
+        self.categorie_input.addItems(categorieOpties)
+        self.karakter_input = QComboBox()
+        self.karakter_input.addItems(karakterOpties)
+        self.tijd_input = QLineEdit()
+
+        layout.addWidget(QLabel('Welke naam wilt u het recept geven?'))
+        layout.addWidget(self.naam_input)
+
+        layout.addWidget(QLabel('Welke verhoudingen wilt u de ingrediënten geven?'))
+        layout.addWidget(self.verhoudingen_input)
+
+        layout.addWidget(QLabel('Welke categorie wilt u de drank bij indelen?'))
+        layout.addWidget(self.categorie_input)
+
+        layout.addWidget(QLabel('Welk karakter wilt u de drank geven?'))
+        layout.addWidget(self.karakter_input)
+
+        layout.addWidget(QLabel('Hoe lang wilt u de ingredienten toevoegen aan secundaire fermentatie?'))
+        layout.addWidget(self.tijd_input)
+
+        knop = QPushButton('Recept opslaan')
+        knop.clicked.connect(self.run_bouwer)
+        layout.addWidget(knop)
+
+        knop_menu = knop_toevoegen(layout, self)
+
+    def run_bouwer(self):
+        try:
+            receptenBouwer(
+                self.naam_input.text(),
+                self.verhoudingen_input.text(),
+                self.categorie_input.currentText(),
+                self.karakter_input.currentText(),
+                self.tijd_input.text(),
+            )
+        except ValueError as error:
+            QMessageBox.warning(self, 'Fout', str(error))
+            return
+
+        QMessageBox.information(self, 'Opgeslagen', 'Het recept is opgeslagen.')
+        open_menu(self)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

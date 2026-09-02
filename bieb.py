@@ -1,12 +1,12 @@
 SMAKEN = {
     "Kers": {
-        'fruitBasis': 2.5,  # fruitbasis gaat uit van per 4kg mede (of ~1 Gallon)
+        'ingrediënt_verhouding': 2.5,  # verhouding gaat uit van per 4kg mede (of ~1 Gallon)
         'categorie': 'fruit',
         'smaakKarakter': 'gebalanceerd',
         'smaakDuur': '14 dagen',  # smaakDuur is hoelang de smaakmaker in de mede moet blijven om z'n smaak te onttrekken.
     },
     "Munt": {
-        'fruitBasis': .25,
+        'ingrediënt_verhouding': .25,
         'categorie': 'kruid',
         'smaakKarakter': 'subtiel',
         'smaakDuur': '5 dagen'
