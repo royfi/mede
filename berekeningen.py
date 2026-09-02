@@ -4,65 +4,21 @@ from bieb import SMAKEN
 karakterOpties = ('subtiel','gebalanceerd','intens')
 categorieOpties = ('fruit', 'kruid', 'elders') #later evt meer opties toevoegen
 
-def main():
-    selectieMenu()
-    
-def selectieMenu():
-    print('Menu\n')
-    print('1. Alcoholpercentage berekenen.\n')
-    print('2. Verhoudingen van uw fruitmelomels berekenen\n')
-    print('3. Recepten inzien\n')
-    print('4. Recepten toevoegen.\n')
-
-    selectie = int(input("Welke functie wilt u gebruiken? 0 sluit het programma"))
-    
-    while selectie != 0:
-        match selectie:
-            case 1: 
-                alcoholPercentage()
-            case 2:
-                fruitMelomel()
-            case 3:
-                recepten()
-            case 4: 
-                receptenBouwer()
-            case _: 
-                selectie = 0     
-        print('Menu\n')
-        print('1. Alcoholpercentage berekenen.\n')
-        print('2. Verhoudingen van uw fruitmelomels berekenen\n')
-        print('3. Recepten inzien\n')
-        print('4. Recepten toevoegen.\n')
-
-        selectie = int(input("Welke functie wilt u gebruiken? 0 sluit het programma"))
+#def main():
 
 def normaliseerDichtheid(dichtheid):
     if dichtheid > 2:
         dichtheid /= 1000
     return dichtheid
 
-def alcoholPercentage():
-    while True:
-        try:
-            startDichtheid = normaliseerDichtheid(
-                float(input('Wat is uw begin dichtheid / gravity?'))
-            )
-            eindDichtheid = normaliseerDichtheid(
-                float(input('Wat is uw eind dichtheid / gravity?'))
-            )
-
-            if eindDichtheid > startDichtheid:
-                print('De einddichtheid mag niet hoger zijn dan de begindichtheid.')
-                continue
-
-            break
-        except ValueError:
-            print('Vul bij beide alstublieft een getal in!')
-
-    abv = (startDichtheid - eindDichtheid)*131.25 
-    procent = f'{abv:.2f}%'#
-    print(f'Als uw begin dichtheid {startDichtheid:.3f} is en uw eind dichtheid {eindDichtheid:.3f} dan is uw alcohol percentage {procent}')
-
+def alcoholPercentage(start_dichtheid, eind_dichtheid):
+    start_dichtheid = normaliseerDichtheid(start_dichtheid)
+    eind_dichtheid = normaliseerDichtheid(eind_dichtheid)
+    if eind_dichtheid > start_dichtheid:
+        raise ValueError('Einddichtheid mag niet hoger zijn dan uw begin dichtheid.')
+    
+    return(start_dichtheid - eind_dichtheid)*131.25
+    
 def fruitMelomel():
     
     while True:
