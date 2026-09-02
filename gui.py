@@ -1,5 +1,5 @@
 import sys
-from PySide6.QtWidgets import QApplication, QDialog, QVBoxLayout, QPushButton , QLineEdit, QLabel, QMessageBox, QComboBox
+from PySide6.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QPushButton , QLineEdit, QLabel, QMessageBox, QComboBox
 from berekeningen import (
     alcoholPercentage,
     categorieOpties,
@@ -14,14 +14,20 @@ def open_menu(dialog):
     menu = SelectieDialog()
     menu.exec()
 
-def knop_toevoegen(layout, dialog):
+def knop_toevoegen(layout, dialog, actieknop=None):
+    knoppen_layout = QHBoxLayout()
+
+    if actieknop is not None:
+        knoppen_layout.addWidget(actieknop)
+
     knop_menu = QPushButton('Menu')
     #setAutoDefault(False) zorgt ervoor dat knop niet automatisch terug gaat naar het SelectieDialog als men enter indruk
     knop_menu.setAutoDefault(False)
     #lambda _checked=False: is ervoor om te zorgen dat de vensters niet gelijk sluiten, maar alleen als de knop is ingedrukt, snap niet hoe het werkt, maar het werkt.
     knop_menu.clicked.connect(lambda _checked=False: open_menu(dialog)) 
 
-    layout.addWidget(knop_menu)
+    knoppen_layout.addWidget(knop_menu) # zorgt ervoor dat bij meerdere knoppen ze naast elkaar terecht komen, ipv onder elkaar
+    layout.addLayout(knoppen_layout) 
     return knop_menu
 
 class SelectieDialog(QDialog):
@@ -88,9 +94,7 @@ class AlcoholDialog(QDialog):
         knop = QPushButton('Bereken uw percentage')
         knop.setAutoDefault(False) #zorgt ervoor dat mijn knop bij enter niet gelijk teruggaat naar het keuze menu.
         knop.clicked.connect(self.run_alcohol)
-        layout.addWidget(knop)
-
-        knop_menu = knop_toevoegen(layout, self)
+        knop_menu = knop_toevoegen(layout, self, knop)
 
     def run_alcohol(self):
         
@@ -121,9 +125,7 @@ class MelomelDialog(QDialog):
 
         knop = QPushButton('Krijg uw verhouden voor uw fruitmelomels.')
         knop.clicked.connect(self.run_melomel)
-        layout.addWidget(knop)
-        
-        knop_menu = knop_toevoegen(layout,self)
+        knop_menu = knop_toevoegen(layout, self, knop)
 
 
     def run_melomel(self):
@@ -188,9 +190,7 @@ class BouwerDialog(QDialog):
 
         knop = QPushButton('Recept opslaan')
         knop.clicked.connect(self.run_bouwer)
-        layout.addWidget(knop)
-
-        knop_menu = knop_toevoegen(layout, self)
+        knop_menu = knop_toevoegen(layout, self, knop)
 
     def run_bouwer(self):
         try:
