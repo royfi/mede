@@ -3,6 +3,7 @@ name: Build Windows
 on:
   push:
     branches: [ gui ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -30,4 +31,3 @@ jobs:
         with:
           name: MedeMaker-Windows
           path: dist\MedeMaker.exe
-
