@@ -1,6 +1,7 @@
 import pprint
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 from bieb import BATCHES, GIST, SMAKEN
 
@@ -32,6 +33,18 @@ karakterOpties = ('subtiel','gebalanceerd','intens')
 categorieOpties = ('fruit', 'kruid', 'elders') #later evt meer opties toevoegen
 gistOpties = tuple(GIST.keys())
 smaakOpties = tuple(SMAKEN.keys())
+
+def valideerDatum(datum):
+    try:
+        datetime.strptime(datum.strip(), '%d/%m/%Y')
+    except (AttributeError, TypeError, ValueError):
+        raise ValueError('Vul een geldige datum in als dd/MM/yyyy.')
+
+    return datum.strip()
+
+def slaBatchesOp():
+    with BATCHES_BESTAND.open('w', encoding='utf-8') as bestand:
+        json.dump(BATCHES, bestand, ensure_ascii=False, indent=4)
 
 #def main():
 

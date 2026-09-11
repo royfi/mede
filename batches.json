@@ -1,23 +1,24 @@
 {
-    "Kers - 11/09/2026":
-    {
-        "Smaak":"Kers",
-        "DatumCreatie" : "11/09/2026",
-        "Metingen":[
+    "Kers - 11/09/2026": {
+        "Smaak": "Kers",
+        "DatumCreatie": "11/09/2026",
+        "Metingen": [
             {
                 "Datum": "11/09/2026",
-                "Dichtheid":1.090
-            },
-            {   
-                "Datum":"18/09/2026",
-                "Dichtheid":1.060
+                "Dichtheid": 1.09
             },
             {
-                "Datum":"25/09/2026",
-                "Dichtheid":1.020
+                "Datum": "18/09/2026",
+                "Dichtheid": 1.06
+            },
+            {
+                "Datum": "25/09/2026",
+                "Dichtheid": 1.02
+            },
+            {
+                "Datum": "11/09/2026",
+                "Dichtheid": 1.01
             }
-
         ]
-
     }
 }

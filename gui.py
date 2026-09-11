@@ -1,5 +1,6 @@
 import sys
-from PySide6.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QPushButton , QLineEdit, QLabel, QMessageBox, QComboBox
+from datetime import date, datetime
+from PySide6.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QPushButton , QLineEdit, QLabel, QMessageBox, QComboBox, QInputDialog
 from berekeningen import (
     alcoholPercentage,
     BATCHES,
@@ -8,7 +9,9 @@ from berekeningen import (
     gistOpties,
     fruitMelomel,
     receptenBouwer,
-    doelAbv
+    slaBatchesOp,
+    doelAbv,
+    valideerDatum,
 )
 from bieb import SMAKEN
 
@@ -17,21 +20,32 @@ def open_menu(dialog):
     menu = SelectieDialog()
     menu.exec()
 
+def knoppen_even_breed(dialog):
+    knoppen = dialog.findChildren(QPushButton)
+    if not knoppen:
+        return
+
+    breedte = max(knop.sizeHint().width() for knop in knoppen)
+    for knop in knoppen:
+        knop.setFixedWidth(breedte)
+
 def knop_toevoegen(layout, dialog, actieknop=None):
     knoppen_layout = QHBoxLayout()
 
     if actieknop is not None:
         knoppen_layout.addWidget(actieknop)
 
-    knop_menu = QPushButton('Menu')
-    #setAutoDefault(False) zorgt ervoor dat knop niet automatisch terug gaat naar het SelectieDialog als men enter indruk
-    knop_menu.setAutoDefault(False)
-    #lambda _checked=False: is ervoor om te zorgen dat de vensters niet gelijk sluiten, maar alleen als de knop is ingedrukt, snap niet hoe het werkt, maar het werkt.
-    knop_menu.clicked.connect(lambda _checked=False: open_menu(dialog)) 
-
-    knoppen_layout.addWidget(knop_menu) # zorgt ervoor dat bij meerdere knoppen ze naast elkaar terecht komen, ipv onder elkaar
+    if not hasattr(dialog, '_menu_knop'):
+        knop_menu = QPushButton('Menu')
+        #setAutoDefault(False) zorgt ervoor dat knop niet automatisch terug gaat naar het SelectieDialog als men enter indruk
+        knop_menu.setAutoDefault(False)
+        #lambda _checked=False: is ervoor om te zorgen dat de vensters niet gelijk sluiten, maar alleen als de knop is ingedrukt, snap niet hoe het werkt, maar het werkt.
+        knop_menu.clicked.connect(lambda _checked=False: open_menu(dialog))
+        dialog._menu_knop = knop_menu
+        knoppen_layout.addWidget(knop_menu)
     layout.addLayout(knoppen_layout) 
-    return knop_menu
+    knoppen_even_breed(dialog)
+    return dialog._menu_knop
 
 class SelectieDialog(QDialog):
     def __init__(self, parent=None):
@@ -61,6 +75,7 @@ class SelectieDialog(QDialog):
         recepten_maker.clicked.connect(self.run_recepten_maker)
         doel_abv.clicked.connect(self.open_doel_abv)
         batch.clicked.connect(self.batch_beheer)
+        knoppen_even_breed(self)
 
     def open_alcohol(self):
         self.close()
@@ -350,16 +365,130 @@ class BatchDialog(QDialog):
         self.batch_resultaat = QLabel()
         layout.addWidget(self.batch_resultaat)
 
+        knop2 = QPushButton('Meting toevoegen')
+        knop2.clicked.connect(self.add_meting)
+        knop2_menu = knop_toevoegen(layout,self,knop2)
+
+        knop3 = QPushButton('Nieuwe Batch starten.')
+        knop3.clicked.connect(self.start_batch)
+        knop3_menu = knop_toevoegen(layout,self,knop3)
+
+        knop4 = QPushButton('Batch verwijderen')
+        knop4.clicked.connect(self.delete_batch)
+        knop4_menu = knop_toevoegen(layout, self, knop4)
+
     def run_batch(self):
         batch = self.batch_input.currentText()
         metingen = BATCHES[batch]["Metingen"]
+        metingen = sorted(
+            metingen,
+            key=lambda meting: datetime.strptime(meting['Datum'], '%d/%m/%Y'),
+        )
 
         tekst = '\n'.join(
-            f'Datum: {meting["Datum"]} - Dichtheid: {meting["Dichtheid"]}'
+            f'Datum: {meting["Datum"]} - Dichtheid: {meting["Dichtheid"]:.3f}'
             for meting in metingen
         )
         self.batch_resultaat.setText(tekst)
-        
+    
+    def add_meting(self):
+        batch = self.batch_input.currentText()
+        datum, ok = QInputDialog.getText(
+            self,
+            'Meting toevoegen',
+            'Datum van de meting (dd/MM/yyyy):',
+            QLineEdit.Normal,
+            date.today().strftime('%d/%m/%Y'),
+        )
+        if not ok:
+            return
+
+        try:
+            datum = valideerDatum(datum)
+        except ValueError as error:
+            QMessageBox.warning(self, 'Ongeldige datum', str(error))
+            return
+
+        dichtheid, ok = QInputDialog.getDouble(
+            self,
+            'Meting toevoegen',
+            'Dichtheid:',
+            1.000,
+            0.900,
+            2.000,
+            3,
+        )
+        if not ok:
+            return
+
+        BATCHES[batch]['Metingen'].append({
+            'Datum': datum,
+            'Dichtheid': dichtheid,
+        })
+        slaBatchesOp()
+        self.run_batch()
+        QMessageBox.information(self, 'Opgeslagen', 'De meting is opgeslagen.')
+
+
+    def start_batch(self):
+        smaak, ok = QInputDialog.getItem(
+            self,
+            'Nieuwe batch',
+            'Welke smaak gebruikt u?',
+            list(SMAKEN.keys()),
+            editable=False,
+        )
+        if not ok:
+            return
+
+        datum, ok = QInputDialog.getText(
+            self,
+            'Nieuwe batch',
+            'Startdatum (dd/MM/yyyy):',
+            QLineEdit.Normal,
+            date.today().strftime('%d/%m/%Y'),
+        )
+        if not ok:
+            return
+
+        try:
+            datum = valideerDatum(datum)
+        except ValueError as error:
+            QMessageBox.warning(self, 'Ongeldige datum', str(error))
+            return
+
+        batch_naam = f'{smaak} - {datum}'
+        if batch_naam in BATCHES:
+            QMessageBox.warning(self, 'Bestaat al', 'Deze batch bestaat al.')
+            return
+
+        BATCHES[batch_naam] = {
+            'Smaak': smaak,
+            'DatumCreatie': datum,
+            'Metingen': [],
+        }
+        slaBatchesOp()
+        self.batch_input.addItem(batch_naam)
+        self.batch_input.setCurrentText(batch_naam)
+        QMessageBox.information(self, 'Opgeslagen', 'De nieuwe batch is opgeslagen.')
+
+    def delete_batch(self):
+        batch = self.batch_input.currentText()
+        bevestiging = QMessageBox.question(
+            self,
+            'Batch verwijderen',
+            f'Weet u zeker dat u batch "{batch}" wilt verwijderen?',
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if bevestiging != QMessageBox.Yes:
+            return
+
+        del BATCHES[batch]
+        slaBatchesOp()
+        self.batch_input.removeItem(self.batch_input.currentIndex())
+        self.batch_resultaat.clear()
+        QMessageBox.information(self, 'Verwijderd', 'De batch is verwijderd.')
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
