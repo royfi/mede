@@ -1,3 +1,4 @@
+yaml
 name: Build Windows
 
 on:
@@ -23,10 +24,11 @@ jobs:
           pip install PySide6 PyInstaller
 
       - name: Build executable
-        run: pyinstaller --onefile --windowed -- name Medemaker gui.py
+        run: pyinstaller --onefile --windowed --name MedeMaker --add-data "recepten.json;." gui.py
 
       - name: Upload executable
         uses: actions/upload-artifact@v4
         with:
           name: MedeMaker-Windows
-          path: dist/gui.exe
+          path: dist\MedeMaker.exe
+
