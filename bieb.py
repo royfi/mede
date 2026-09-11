@@ -31,3 +31,5 @@ GIST = {  # Nog kijken wat ik hier later mee ga doen, mss alleen om recepten uit
 
     },
 }
+
+BATCHES = {}

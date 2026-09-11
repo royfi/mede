@@ -2,7 +2,7 @@ import pprint
 import json
 import sys
 from pathlib import Path
-from bieb import GIST, SMAKEN
+from bieb import BATCHES, GIST, SMAKEN
 
 if getattr(sys, 'frozen', False):
     RECEPTEN_BESTAND = Path(sys.executable).resolve().with_name('recepten.json')
@@ -11,10 +11,22 @@ else:
     RECEPTEN_BESTAND = Path(__file__).with_name('recepten.json')
     RECEPTEN_BUNDEL = RECEPTEN_BESTAND
 
+if getattr(sys, 'frozen', False):
+    BATCHES_BESTAND = Path(sys.executable).resolve().with_name('batches.json')
+    BATCHES_BUNDEL = Path(getattr(sys, '_MEIPASS', Path(__file__).parent)) / 'batches.json'
+else:
+    BATCHES_BESTAND = Path(__file__).with_name('batches.json')
+    BATCHES_BUNDEL = BATCHES_BESTAND
+
 RECEPTEN_BRON = RECEPTEN_BESTAND if RECEPTEN_BESTAND.exists() else RECEPTEN_BUNDEL #zorgt ervoor dat ik de receptenbibliotheek permanent kan opslaan.
 if RECEPTEN_BRON.exists():
     with RECEPTEN_BRON.open(encoding='utf-8') as bestand:
         SMAKEN.update(json.load(bestand))
+
+BATCHES_BRON = BATCHES_BESTAND if BATCHES_BESTAND.exists() else BATCHES_BUNDEL
+if BATCHES_BRON.exists():
+    with BATCHES_BRON.open(encoding='utf-8') as bestand:
+        BATCHES.update(json.load(bestand))
 
 karakterOpties = ('subtiel','gebalanceerd','intens')
 categorieOpties = ('fruit', 'kruid', 'elders') #later evt meer opties toevoegen
@@ -77,11 +89,6 @@ def fruitMelomel(mede_volume, mede_smaak,karakter):
         ingrediënt_totaal = ingrediënt_verhouding * 1.33
    
     return honing, ingrediënt_totaal, karakter
-
-def recepten():
-    #niet echt een recept nu, moet later dit beter formateren, en echte receptenlijst geven. ipv de dictLijst. mss extra dict met recepten?
-    #  or alleen belangrijke keys uit de dict pakken?
-    pass
 
     
 def receptenBouwer(naam, verhoudingen, categorie, karakter, tijd, gist):

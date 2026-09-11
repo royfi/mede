@@ -2,6 +2,7 @@ import sys
 from PySide6.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QPushButton , QLineEdit, QLabel, QMessageBox, QComboBox
 from berekeningen import (
     alcoholPercentage,
+    BATCHES,
     categorieOpties,
     karakterOpties,
     gistOpties,
@@ -44,12 +45,14 @@ class SelectieDialog(QDialog):
         recept = QPushButton("Zie uw recepten in.")
         recepten_maker = QPushButton("Voeg nieuwe recepten toe.")
         doel_abv = QPushButton('Bereken hoe u uw doel alcohol percentage kan bereiken.')
+        batch = QPushButton('Beheer uw batches')
 
         layout.addWidget(alcohol)
         layout.addWidget(melomel)
         layout.addWidget(recept)
         layout.addWidget(recepten_maker)
         layout.addWidget(doel_abv)
+        layout.addWidget(batch)
 
     
         alcohol.clicked.connect(self.open_alcohol)
@@ -57,6 +60,7 @@ class SelectieDialog(QDialog):
         recept.clicked.connect(self.run_recept)
         recepten_maker.clicked.connect(self.run_recepten_maker)
         doel_abv.clicked.connect(self.open_doel_abv)
+        batch.clicked.connect(self.batch_beheer)
 
     def open_alcohol(self):
         self.close()
@@ -81,6 +85,11 @@ class SelectieDialog(QDialog):
     def run_recepten_maker(self):
         self.close()
         dialog = BouwerDialog()
+        dialog.exec()
+    
+    def batch_beheer(self):
+        self.close()
+        dialog = BatchDialog()
         dialog.exec()
     
 class AlcoholDialog(QDialog):
@@ -265,7 +274,6 @@ class ReceptenDialog(QDialog):
         self.recept_resultaat.setText(tekst)
 
 
-
 class BouwerDialog(QDialog):
     def __init__(self):
         super().__init__()
@@ -321,6 +329,37 @@ class BouwerDialog(QDialog):
 
         QMessageBox.information(self, 'Opgeslagen', 'Het recept is opgeslagen.')
         open_menu(self)
+
+class BatchDialog(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Batch Beheer")
+
+        layout = QVBoxLayout(self)
+
+        self.batch_input = QComboBox()
+        self.batch_input.addItems(list(BATCHES.keys()))
+        
+        layout.addWidget(QLabel("Welke batch wilt u inzien?"))
+        layout.addWidget(self.batch_input)
+
+        knop = QPushButton('Batch bekijken.')
+        knop.clicked.connect(self.run_batch)
+        knop_menu = knop_toevoegen(layout,self,knop)
+        
+        self.batch_resultaat = QLabel()
+        layout.addWidget(self.batch_resultaat)
+
+    def run_batch(self):
+        batch = self.batch_input.currentText()
+        metingen = BATCHES[batch]["Metingen"]
+
+        tekst = '\n'.join(
+            f'Datum: {meting["Datum"]} - Dichtheid: {meting["Dichtheid"]}'
+            for meting in metingen
+        )
+        self.batch_resultaat.setText(tekst)
+        
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
