@@ -1,0 +1,23 @@
+{
+    "Kers": {
+        "ingrediënt_verhouding": 2.5,
+        "categorie": "fruit",
+        "smaakKarakter": "gebalanceerd",
+        "smaakDuur": "14 dagen",
+        "gistSleutel": "71B"
+    },
+    "Munt": {
+        "ingrediënt_verhouding": 0.25,
+        "categorie": "kruid",
+        "smaakKarakter": "subtiel",
+        "smaakDuur": "5 dagen",
+        "gistSleutel": "D-47"
+    },
+    "Aardbei": {
+        "ingrediënt_verhouding": 0.3,
+        "categorie": "fruit",
+        "smaakKarakter": "gebalanceerd",
+        "smaakDuur": "14 dagen",
+        "gistSleutel": "D-47"
+    }
+}
